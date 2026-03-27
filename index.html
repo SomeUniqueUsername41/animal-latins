@@ -86,22 +86,31 @@
         return token;
       }
 
+      let isAllCaps = token.length >= 2 && token === token.toUpperCase();
       let startsWithCapital = token[0] === token[0].toUpperCase();
       let lower = token.toLowerCase();
 
-      let firstVowelIndex = getFirstVowelIndex(lower);
-
       let translated;
 
-      if (firstVowelIndex === 0) {
-        translated = lower + "w" + suffix;
+      if (lower.startsWith("qu")) {
+        translated = lower.slice(2) + "qu" + suffix;
+      } else if (startsWithHyRule(lower)) {
+        translated = lower.slice(1) + "h" + suffix;
       } else {
-        let cluster = lower.slice(0, firstVowelIndex);
-        let rest = lower.slice(firstVowelIndex);
-        translated = rest + cluster + suffix;
+        let firstVowelIndex = getFirstVowelIndex(lower);
+
+        if (firstVowelIndex === 0) {
+          translated = lower + "w" + suffix;
+        } else {
+          let cluster = lower.slice(0, firstVowelIndex);
+          let rest = lower.slice(firstVowelIndex);
+          translated = rest + cluster + suffix;
+        }
       }
 
-      if (startsWithCapital) {
+      if (isAllCaps) {
+        translated = translated.toUpperCase();
+      } else if (startsWithCapital) {
         translated = translated.charAt(0).toUpperCase() + translated.slice(1);
       }
 
@@ -109,14 +118,44 @@
     }).join("");
   }
 
-  function getFirstVowelIndex(word) {
-    // First check for a, e, i, o, u
-    let match = word.search(/[aeiou]/);
-    if (match !== -1) {
-      return match;
-    }
+  function startsWithHyRule(word) {
+    const hyWords = [
+      "hyena",
+      "hyaena",
+      "hybrid",
+      "hyper",
+      "hyperactive",
+      "hyperactivity",
+      "hygiene",
+      "hyacinth",
+      "hydrogen",
+      "hydrogen bond",
+      "hydrogenation",
+      "hyphen",
+      "hyphenate",
+      "hyphenated",
+      "hypertrophy",
+      "hypertrophic",
+      "hypothesis",
+      "hypotheses",
+      "hyaluronic",
+      "hyena",
+      "hydration",
+      "hydrated",
+      "hydra",
+      "hydrogen",
+      "hyper",
+      "hybrid",
+      "hyphen"
+    ];
 
-    // Use y only when it is the only vowel in the word
+    return word.startsWith("hy") || hyWords.includes(word);
+  }
+
+  function getFirstVowelIndex(word) {
+    let match = word.search(/[aeiou]/);
+    if (match !== -1) return match;
+
     return word.search(/y/);
   }
 </script>
