@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Animal Latin Translator</title>
+  <style>
+    /* Adjusted CSS for better alignment and resizable boxes */
+    #input-form {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    textarea,
+    .output-box {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      max-width: 800px; /* Set maximum width */
+      height: 150px; /* Adjust the height as desired */
+      text-align: left; /* Align text to the left */
+      font-family: Arial, sans-serif; /* Specify the font family */
+      line-height: 1.5; /* Set line height for better readability */
+    }
+  </style>
+</head>
+<body>
+  <div id="input-form">
+    <label for="input">Enter text here</label>
+    <textarea id="input"></textarea>
+    <label for="animal-select">Select Animal Latin</label>
+    <select id="animal-select">
+      <option value="ay">Pig Latin</option>
+      <option value="ack">Duck Latin</option>
+      <option value="eak">Mouse Latin</option>
+      <option value="uck">Chicken Latin</option>
+      <option value="oot">Monkey Latin</option>
+      <option value="ark">Dog Latin</option>
+      <option value="oak">Frog Latin</option>
+      <option value="iss">Snake Latin</option>
+      <option value="irp">Bird Latin</option>
+      <option value="onk">Goose Latin</option>
+      <option value="out">Crocodile Latin</option>
+      <option value="oof">Deer Latin</option>
+      <option value="ell">Turtle Latin</option>
+      <option value="orn">Goat Latin</option>
+      <option value="aw">Bear Latin</option>
+      <option value="awk">Parrot Latin</option>
+      <option value="ale">Lizard Latin</option>
+      <option value="ipe">Zebra Latin</option>
+      <option value="ane">Lion Latin</option>
+      <option value="ut">Squirrel Latin</option>
+      <option value="ump">Camel Latin</option>
+      <option value="unk">Elephant Latin</option>
+    </select>
+  </div>
+  <div>
+    <label for="output">Translation</label>
+    <textarea id="output" class="output-box" readonly></textarea>
+  </div>
+  
+  <p>When I was around 13 or 14 years old, there was an app for a Duck Latin translator that was just like a Pig Latin translator, but it used the suffix "-ack" (like "quack") instead of "-ay". This translator takes that same idea for different animal-based Latins and uses suffixes based on qualities of and things associated with the respective animals that the different animal Latins are based off of. So, for instance, Mouse Latin uses the suffix "-eak" as in "squeak" and Squirrel Latin uses "-ut" as in "nut".</p>
+
+  <script>
+  let input = document.getElementById("input");
+  let animalSelect = document.getElementById("animal-select");
+  let output = document.getElementById("output");
+
+  input.addEventListener("input", updateOutput);
+  animalSelect.addEventListener("change", updateOutput);
+
+  function updateOutput() {
+    output.value = translateToAnimalLatin(input.value, animalSelect.value);
+  }
+
+  function translateToAnimalLatin(text, suffix) {
+    let tokens = text.split(/([A-Za-z]+(?:'[A-Za-z]+)*)/);
+
+    return tokens.map(token => {
+      if (!/^[A-Za-z]+(?:'[A-Za-z]+)*$/.test(token)) {
+        return token;
+      }
+
+      let startsWithCapital = token[0] === token[0].toUpperCase();
+      let lower = token.toLowerCase();
+
+      let firstVowelIndex = getFirstVowelIndex(lower);
+
+      let translated;
+
+      if (firstVowelIndex === 0) {
+        translated = lower + "w" + suffix;
+      } else {
+        let cluster = lower.slice(0, firstVowelIndex);
+        let rest = lower.slice(firstVowelIndex);
+        translated = rest + cluster + suffix;
+      }
+
+      if (startsWithCapital) {
+        translated = translated.charAt(0).toUpperCase() + translated.slice(1);
+      }
+
+      return translated;
+    }).join("");
+  }
+
+  function getFirstVowelIndex(word) {
+    // First check for a, e, i, o, u
+    let match = word.search(/[aeiou]/);
+    if (match !== -1) {
+      return match;
+    }
+
+    // Use y only when it is the only vowel in the word
+    return word.search(/y/);
+  }
+</script>
+</body>
+</html>
