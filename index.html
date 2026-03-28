@@ -3,7 +3,6 @@
 <head>
   <title>Animal Latin Translator</title>
   <style>
-    /* Adjusted CSS for better alignment and resizable boxes */
     #input-form {
       margin-bottom: 20px;
     }
@@ -18,11 +17,11 @@
       width: 100%;
       padding: 10px;
       font-size: 16px;
-      max-width: 800px; /* Set maximum width */
-      height: 150px; /* Adjust the height as desired */
-      text-align: left; /* Align text to the left */
-      font-family: Arial, sans-serif; /* Specify the font family */
-      line-height: 1.5; /* Set line height for better readability */
+      max-width: 800px;
+      height: 150px;
+      text-align: left;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
     }
   </style>
 </head>
@@ -30,6 +29,7 @@
   <div id="input-form">
     <label for="input">Enter text here</label>
     <textarea id="input"></textarea>
+
     <label for="animal-select">Select Animal Latin</label>
     <select id="animal-select">
       <option value="ay">Pig Latin</option>
@@ -59,105 +59,105 @@
       <option value="op">Rabbit Latin</option>
     </select>
   </div>
+
   <div>
     <label for="output">Translation</label>
     <textarea id="output" class="output-box" readonly></textarea>
   </div>
-  
+
   <p>When I was around 13 or 14 years old, there was an app for a Duck Latin translator that was just like a Pig Latin translator, but it used the suffix "-ack" (like "quack") instead of "-ay". This translator takes that same idea for different animal-based Latins and uses suffixes based on qualities of and things associated with the respective animals that the different animal Latins are based off of. So, for instance, Mouse Latin uses the suffix "-eak" as in "squeak" and Squirrel Latin uses "-ut" as in "nut".</p>
 
   <script>
-  let input = document.getElementById("input");
-  let animalSelect = document.getElementById("animal-select");
-  let output = document.getElementById("output");
+    let input = document.getElementById("input");
+    let animalSelect = document.getElementById("animal-select");
+    let output = document.getElementById("output");
 
-  input.addEventListener("input", updateOutput);
-  animalSelect.addEventListener("change", updateOutput);
+    input.addEventListener("input", updateOutput);
+    animalSelect.addEventListener("change", updateOutput);
 
-  function updateOutput() {
-    output.value = translateToAnimalLatin(input.value, animalSelect.value);
-  }
+    function updateOutput() {
+      output.value = translateToAnimalLatin(input.value, animalSelect.value);
+    }
 
-  function translateToAnimalLatin(text, suffix) {
-    let tokens = text.split(/([A-Za-z]+(?:'[A-Za-z]+)*)/);
+    function translateToAnimalLatin(text, suffix) {
+      let tokens = text.split(/([A-Za-z]+(?:'[A-Za-z]+)*)/);
 
-    return tokens.map(token => {
-      if (!/^[A-Za-z]+(?:'[A-Za-z]+)*$/.test(token)) {
-        return token;
-      }
-
-      let isAllCaps = token.length >= 2 && token === token.toUpperCase();
-      let startsWithCapital = token[0] === token[0].toUpperCase();
-      let lower = token.toLowerCase();
-
-      let translated;
-
-      if (lower.startsWith("qu")) {
-        translated = lower.slice(2) + "qu" + suffix;
-      } else if (startsWithHyRule(lower)) {
-        translated = lower.slice(1) + "h" + suffix;
-      } else {
-        let firstVowelIndex = getFirstVowelIndex(lower);
-
-        if (firstVowelIndex === 0) {
-          translated = lower + "w" + suffix;
-        } else {
-          let cluster = lower.slice(0, firstVowelIndex);
-          let rest = lower.slice(firstVowelIndex);
-          translated = rest + cluster + suffix;
+      return tokens.map(token => {
+        if (!/^[A-Za-z]+(?:'[A-Za-z]+)*$/.test(token)) {
+          return token;
         }
-      }
 
-      if (isAllCaps) {
-        translated = translated.toUpperCase();
-      } else if (startsWithCapital) {
-        translated = translated.charAt(0).toUpperCase() + translated.slice(1);
-      }
+        if (token.length === 1 && !/^[AaIi]$/.test(token)) {
+          return token;
+        }
 
-      return translated;
-    }).join("");
-  }
+        let isAllCaps = token.length >= 2 && token === token.toUpperCase();
+        let startsWithCapital = token[0] === token[0].toUpperCase();
+        let lower = token.toLowerCase();
 
-  function startsWithHyRule(word) {
-    const hyWords = [
-      "hyena",
-      "hyaena",
-      "hybrid",
-      "hyper",
-      "hyperactive",
-      "hyperactivity",
-      "hygiene",
-      "hyacinth",
-      "hydrogen",
-      "hydrogen bond",
-      "hydrogenation",
-      "hyphen",
-      "hyphenate",
-      "hyphenated",
-      "hypertrophy",
-      "hypertrophic",
-      "hypothesis",
-      "hypotheses",
-      "hyaluronic",
-      "hyena",
-      "hydration",
-      "hydrated",
-      "hydra",
-      "hydrogen",
-      "hyper",
-      "hybrid",
-      "hyphen"
-    ];
+        let translated;
 
-    return word.startsWith("hy") || hyWords.includes(word);
-  }
+        if (lower.startsWith("qu")) {
+          translated = lower.slice(2) + "qu" + suffix;
+        } else if (startsWithHyRule(lower)) {
+          translated = lower.slice(1) + "h" + suffix;
+        } else {
+          let firstVowelIndex = getFirstVowelIndex(lower);
 
-  function getFirstVowelIndex(word) {
-    let match = word.search(/[aeiou]/);
-    if (match !== -1) return match;
+          if (firstVowelIndex === 0) {
+            translated = lower + "w" + suffix;
+          } else {
+            let cluster = lower.slice(0, firstVowelIndex);
+            let rest = lower.slice(firstVowelIndex);
+            translated = rest + cluster + suffix;
+          }
+        }
 
-    return word.search(/y/);
-  }
-</script>
+        if (isAllCaps) {
+          translated = translated.toUpperCase();
+        } else if (startsWithCapital) {
+          translated = translated.charAt(0).toUpperCase() + translated.slice(1);
+        }
+
+        return translated;
+      }).join("");
+    }
+
+    function startsWithHyRule(word) {
+      const hyWords = [
+        "hyena",
+        "hyaena",
+        "hybrid",
+        "hyper",
+        "hyperactive",
+        "hyperactivity",
+        "hygiene",
+        "hyacinth",
+        "hydrogen",
+        "hydrogen bond",
+        "hydrogenation",
+        "hyphen",
+        "hyphenate",
+        "hyphenated",
+        "hypertrophy",
+        "hypertrophic",
+        "hypothesis",
+        "hypotheses",
+        "hyaluronic",
+        "hydration",
+        "hydrated",
+        "hydra"
+      ];
+
+      return word.startsWith("hy") || hyWords.includes(word);
+    }
+
+    function getFirstVowelIndex(word) {
+      let match = word.search(/[aeiou]/);
+      if (match !== -1) return match;
+
+      return word.search(/y/);
+    }
+  </script>
 </body>
 </html>
