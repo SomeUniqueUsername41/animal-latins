@@ -64,6 +64,8 @@
     <label for="output">Translation</label>
     <textarea id="output" class="output-box" readonly></textarea>
   </div>
+  
+  <p>When I was around 13 or 14 years old, there was an app for a Duck Latin translator that was just like a Pig Latin translator, but it used the suffix "-ack" (like "quack") instead of "-ay". This translator takes that same idea for different animal-based Latins and uses suffixes based on qualities of, the sounds of, and things associated with the respective animals that the different animal Latins are based off of. So, for instance, Mouse Latin uses the suffix "-eak" as in "squeak" and Squirrel Latin uses "-ut" as in "nut", and Camel Latin uses "-ump" as in "hump".</p>
 
   <script>
     let input = document.getElementById("input");
@@ -78,7 +80,7 @@
     }
 
     function translateToAnimalLatin(text, suffix) {
-      let tokens = text.split(/([A-Za-z]+(?:'[A-Za-z]+)*|-|\.)/);
+      let tokens = text.split(/([A-Za-z]+(?:'[A-Za-z]+)*|-|\.|)/);
       let result = [];
 
       for (let i = 0; i < tokens.length; i++) {
@@ -106,12 +108,26 @@
           continue;
         }
 
+        // acronym handling (S.T.A.R.S. etc.)
+        if (isAcronym(tokens, i)) {
+          result.push(handleAcronym(tokens, i));
+
+          while (i + 1 < tokens.length) {
+            if (tokens[i + 1] === ".") {
+              i += 2;
+              continue;
+            }
+            break;
+          }
+
+          continue;
+        }
+
         if (!/^[A-Za-z]+(?:'[A-Za-z]+)*$/.test(token)) {
           result.push(token);
           continue;
         }
 
-        // NEW RULE: skip abbreviations like "Dr", "Mr", "TV"
         if (isConsonantAbbreviation(token)) {
           result.push(token);
           continue;
@@ -123,13 +139,36 @@
       return result.join("");
     }
 
+    function isAcronym(tokens, i) {
+      return (
+        /^[A-Za-z]$/.test(tokens[i]) &&
+        tokens[i + 1] === "."
+      );
+    }
+
+    function handleAcronym(tokens, i) {
+      let letters = [];
+
+      while (i < tokens.length) {
+        if (/^[A-Za-z]$/.test(tokens[i])) {
+          letters.push(tokens[i]);
+        }
+
+        if (tokens[i + 1] !== ".") break;
+
+        i += 2;
+      }
+
+      return letters.map(ch => {
+        let up = ch.toUpperCase();
+        if (up === "A" || up === "I") return ch;
+        return ch;
+      }).join("");
+    }
+
     function isConsonantAbbreviation(word) {
       let lower = word.toLowerCase();
-
-      // must be 2+ letters, no vowels at all
-      if (lower.length < 2) return false;
-
-      return !/[aeiou]/.test(lower);
+      return lower.length >= 2 && !/[aeiou]/.test(lower);
     }
 
     function translateWord(token, suffix) {
