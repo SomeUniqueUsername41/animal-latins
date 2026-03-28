@@ -128,6 +128,7 @@
           continue;
         }
 
+        // Do not block words where Y is the only vowel
         if (isConsonantAbbreviation(token)) {
           result.push(token);
           continue;
@@ -166,9 +167,18 @@
       }).join("");
     }
 
+    function hasOnlyYAsVowel(word) {
+      return !/[aeiou]/.test(word) && /y/.test(word);
+    }
+
     function isConsonantAbbreviation(word) {
       let lower = word.toLowerCase();
-      return lower.length >= 2 && !/[aeiou]/.test(lower);
+
+      if (hasOnlyYAsVowel(lower)) {
+        return false;
+      }
+
+      return lower.length >= 2 && !/[aeiouy]/.test(lower);
     }
 
     function translateWord(token, suffix) {
@@ -180,7 +190,13 @@
 
       let translated;
 
-      if (lower.startsWith("qu")) {
+      // Y-only vowel rule
+      if (hasOnlyYAsVowel(lower)) {
+        let firstYIndex = lower.indexOf("y");
+        let cluster = lower.slice(0, firstYIndex);
+        let rest = lower.slice(firstYIndex);
+        translated = rest + cluster + suffix;
+      } else if (lower.startsWith("qu")) {
         translated = lower.slice(2) + "qu" + suffix;
       } else if (startsWithHyRule(lower)) {
         translated = lower.slice(1) + "h" + suffix;
