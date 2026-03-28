@@ -15,13 +15,17 @@
     textarea,
     .output-box {
       width: 100%;
+      min-width: 300px;
+      min-height: 150px;
       padding: 10px;
       font-size: 16px;
       max-width: 800px;
-      height: 150px;
       text-align: left;
       font-family: Arial, sans-serif;
       line-height: 1.5;
+      resize: both;
+      overflow: auto;
+      box-sizing: border-box;
     }
   </style>
 </head>
@@ -64,10 +68,10 @@
     <label for="output">Translation</label>
     <textarea id="output" class="output-box" readonly></textarea>
   </div>
-
-  <p>If inputting acronyms, like NASA, please put periods in between the letters so that it doesn't come out weird, like N.A.S.A..</p>
+  
+  <p>If inputting acronyms, like NASA, please put periods in between the letters (like N.A.S.A.) so that the translator doesn't translate them.</p>
   <br>
-  <p>When I was around 13 or 14 years old, there was an app for a Duck Latin translator that was just like a Pig Latin translator, but it used the suffix "-ack" (like "quack") instead of "-ay". This translator takes that same idea for different animal-based Latins and uses suffixes based on qualities of, the sounds of, and things associated with the respective animals that the different animal Latins are based off of. So, for instance, Mouse Latin uses the suffix "-eak" as in "squeak" and Squirrel Latin uses "-ut" as in "nut", and Camel Latin uses "-ump" as in "hump".</p>
+  <p>When I was around 14 years old, there was an app for a translator for Duck Latin that was just like Pig Latin, but it used the suffix "-ack" (like "quack") instead of "-ay" like in Pig Latin. This translator takes that same idea for different animal-based Latins and uses suffixes based on qualities of, the sounds of, and things associated with the respective animals that the different animal Latins are based off of. So, for instance, Mouse Latin uses the suffix "-eak" as in "squeak" and Squirrel Latin uses "-ut" as in "nut", and Camel Latin uses "-ump" as in "hump".</p>
 
   <script>
     let input = document.getElementById("input");
@@ -82,11 +86,19 @@
     }
 
     function translateToAnimalLatin(text, suffix) {
-      let tokens = text.split(/([A-Za-z]+(?:'[A-Za-z]+)*|-|\.|)/);
+      let tokens = text.match(/[A-Za-z]+(?:'[A-Za-z]+)*|\.|-|[^A-Za-z.\-]+/g) || [];
       let result = [];
 
       for (let i = 0; i < tokens.length; i++) {
         let token = tokens[i];
+
+        // Keep acronym runs like N.A.S.A. unchanged
+        let acronymLength = getAcronymRunLength(tokens, i);
+        if (acronymLength >= 2) {
+          result.push(handleAcronym(tokens, i, acronymLength));
+          i += (acronymLength * 2) - 1;
+          continue;
+        }
 
         // sci-fi special case
         if (
@@ -110,27 +122,11 @@
           continue;
         }
 
-        // acronym handling (S.T.A.R.S. etc.)
-        if (isAcronym(tokens, i)) {
-          result.push(handleAcronym(tokens, i));
-
-          while (i + 1 < tokens.length) {
-            if (tokens[i + 1] === ".") {
-              i += 2;
-              continue;
-            }
-            break;
-          }
-
-          continue;
-        }
-
         if (!/^[A-Za-z]+(?:'[A-Za-z]+)*$/.test(token)) {
           result.push(token);
           continue;
         }
 
-        // Do not block words where Y is the only vowel
         if (isConsonantAbbreviation(token)) {
           result.push(token);
           continue;
@@ -142,31 +138,30 @@
       return result.join("");
     }
 
-    function isAcronym(tokens, i) {
-      return (
-        /^[A-Za-z]$/.test(tokens[i]) &&
-        tokens[i + 1] === "."
-      );
-    }
+    function getAcronymRunLength(tokens, i) {
+      let count = 0;
+      let j = i;
 
-    function handleAcronym(tokens, i) {
-      let letters = [];
-
-      while (i < tokens.length) {
-        if (/^[A-Za-z]$/.test(tokens[i])) {
-          letters.push(tokens[i]);
-        }
-
-        if (tokens[i + 1] !== ".") break;
-
-        i += 2;
+      while (
+        j + 1 < tokens.length &&
+        /^[A-Z]$/.test(tokens[j]) &&
+        tokens[j + 1] === "."
+      ) {
+        count++;
+        j += 2;
       }
 
-      return letters.map(ch => {
-        let up = ch.toUpperCase();
-        if (up === "A" || up === "I") return ch;
-        return ch;
-      }).join("");
+      return count;
+    }
+
+    function handleAcronym(tokens, i, acronymLength) {
+      let letters = [];
+
+      for (let k = 0; k < acronymLength; k++) {
+        letters.push(tokens[i + (k * 2)]);
+      }
+
+      return letters.join(".");
     }
 
     function hasOnlyYAsVowel(word) {
@@ -184,15 +179,12 @@
     }
 
     function translateWord(token, suffix) {
-      if (token.length === 1 && !/^[AaIi]$/.test(token)) return token;
-
       let isAllCaps = token.length >= 2 && token === token.toUpperCase();
       let startsWithCapital = token[0] === token[0].toUpperCase();
       let lower = token.toLowerCase();
 
       let translated;
 
-      // Y-only vowel rule
       if (hasOnlyYAsVowel(lower)) {
         let firstYIndex = lower.indexOf("y");
         let cluster = lower.slice(0, firstYIndex);
