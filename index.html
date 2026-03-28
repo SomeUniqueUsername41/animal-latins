@@ -65,8 +65,6 @@
     <textarea id="output" class="output-box" readonly></textarea>
   </div>
 
-  <p>When I was around 13 or 14 years old, there was an app for a Duck Latin translator that was just like a Pig Latin translator, but it used the suffix "-ack" (like "quack") instead of "-ay". This translator takes that same idea for different animal-based Latins and uses suffixes based on qualities of and things associated with the respective animals that the different animal Latins are based off of. So, for instance, Mouse Latin uses the suffix "-eak" as in "squeak" and Squirrel Latin uses "-ut" as in "nut".</p>
-
   <script>
     let input = document.getElementById("input");
     let animalSelect = document.getElementById("animal-select");
@@ -80,73 +78,100 @@
     }
 
     function translateToAnimalLatin(text, suffix) {
-      let tokens = text.split(/([A-Za-z]+(?:'[A-Za-z]+)*)/);
+      let tokens = text.split(/([A-Za-z]+(?:'[A-Za-z]+)*|-|\.)/);
+      let result = [];
 
-      return tokens.map(token => {
-        if (!/^[A-Za-z]+(?:'[A-Za-z]+)*$/.test(token)) {
-          return token;
-        }
+      for (let i = 0; i < tokens.length; i++) {
+        let token = tokens[i];
 
-        if (token.length === 1 && !/^[AaIi]$/.test(token)) {
-          return token;
-        }
+        // sci-fi special case
+        if (
+          /^[A-Za-z]+$/.test(token) &&
+          tokens[i + 1] === "-" &&
+          /^[A-Za-z]+$/.test(tokens[i + 2])
+        ) {
+          let combined = (token + "-" + tokens[i + 2]).toLowerCase();
 
-        let isAllCaps = token.length >= 2 && token === token.toUpperCase();
-        let startsWithCapital = token[0] === token[0].toUpperCase();
-        let lower = token.toLowerCase();
-
-        let translated;
-
-        if (lower.startsWith("qu")) {
-          translated = lower.slice(2) + "qu" + suffix;
-        } else if (startsWithHyRule(lower)) {
-          translated = lower.slice(1) + "h" + suffix;
-        } else {
-          let firstVowelIndex = getFirstVowelIndex(lower);
-
-          if (firstVowelIndex === 0) {
-            translated = lower + "w" + suffix;
+          if (combined === "sci-fi") {
+            result.push("i-fisc" + suffix);
           } else {
-            let cluster = lower.slice(0, firstVowelIndex);
-            let rest = lower.slice(firstVowelIndex);
-            translated = rest + cluster + suffix;
+            result.push(
+              translateWord(token, suffix) +
+              "-" +
+              translateWord(tokens[i + 2], suffix)
+            );
           }
+
+          i += 2;
+          continue;
         }
 
-        if (isAllCaps) {
-          translated = translated.toUpperCase();
-        } else if (startsWithCapital) {
-          translated = translated.charAt(0).toUpperCase() + translated.slice(1);
+        if (!/^[A-Za-z]+(?:'[A-Za-z]+)*$/.test(token)) {
+          result.push(token);
+          continue;
         }
 
-        return translated;
-      }).join("");
+        // NEW RULE: skip abbreviations like "Dr", "Mr", "TV"
+        if (isConsonantAbbreviation(token)) {
+          result.push(token);
+          continue;
+        }
+
+        result.push(translateWord(token, suffix));
+      }
+
+      return result.join("");
+    }
+
+    function isConsonantAbbreviation(word) {
+      let lower = word.toLowerCase();
+
+      // must be 2+ letters, no vowels at all
+      if (lower.length < 2) return false;
+
+      return !/[aeiou]/.test(lower);
+    }
+
+    function translateWord(token, suffix) {
+      if (token.length === 1 && !/^[AaIi]$/.test(token)) return token;
+
+      let isAllCaps = token.length >= 2 && token === token.toUpperCase();
+      let startsWithCapital = token[0] === token[0].toUpperCase();
+      let lower = token.toLowerCase();
+
+      let translated;
+
+      if (lower.startsWith("qu")) {
+        translated = lower.slice(2) + "qu" + suffix;
+      } else if (startsWithHyRule(lower)) {
+        translated = lower.slice(1) + "h" + suffix;
+      } else {
+        let firstVowelIndex = getFirstVowelIndex(lower);
+
+        if (firstVowelIndex === 0) {
+          translated = lower + "w" + suffix;
+        } else {
+          let cluster = lower.slice(0, firstVowelIndex);
+          let rest = lower.slice(firstVowelIndex);
+          translated = rest + cluster + suffix;
+        }
+      }
+
+      if (isAllCaps) {
+        translated = translated.toUpperCase();
+      } else if (startsWithCapital) {
+        translated = translated.charAt(0).toUpperCase() + translated.slice(1);
+      }
+
+      return translated;
     }
 
     function startsWithHyRule(word) {
       const hyWords = [
-        "hyena",
-        "hyaena",
-        "hybrid",
-        "hyper",
-        "hyperactive",
-        "hyperactivity",
-        "hygiene",
-        "hyacinth",
-        "hydrogen",
-        "hydrogen bond",
-        "hydrogenation",
-        "hyphen",
-        "hyphenate",
-        "hyphenated",
-        "hypertrophy",
-        "hypertrophic",
-        "hypothesis",
-        "hypotheses",
-        "hyaluronic",
-        "hydration",
-        "hydrated",
-        "hydra"
+        "hyena","hyaena","hybrid","hyper","hyperactive","hyperactivity",
+        "hygiene","hyacinth","hydrogen","hydrogenation","hyphen",
+        "hyphenate","hyphenated","hypertrophy","hypertrophic",
+        "hypothesis","hypotheses","hyaluronic","hydration","hydrated","hydra"
       ];
 
       return word.startsWith("hy") || hyWords.includes(word);
@@ -155,7 +180,6 @@
     function getFirstVowelIndex(word) {
       let match = word.search(/[aeiou]/);
       if (match !== -1) return match;
-
       return word.search(/y/);
     }
   </script>
