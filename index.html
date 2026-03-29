@@ -13,24 +13,24 @@
     }
 
     textarea,
-.output-box {
-  width: 800px;
-  max-width: 2000px;
-  min-width: 300px;
+    .output-box {
+      width: 800px;
+      max-width: 2000px;
+      min-width: 300px;
 
-  height: 150px;
-  min-height: 150px;
+      height: 150px;
+      min-height: 150px;
 
-  padding: 10px;
-  font-size: 16px;
-  text-align: left;
-  font-family: Arial, sans-serif;
-  line-height: 1.5;
+      padding: 10px;
+      font-size: 16px;
+      text-align: left;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
 
-  resize: both;
-  overflow: auto;
-  box-sizing: border-box;
-}
+      resize: both;
+      overflow: auto;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
@@ -200,7 +200,9 @@
 
       let translated;
 
-      if (hasOnlyYAsVowel(lower)) {
+      if (lower === "an") {
+        translated = "aw" + suffix;
+      } else if (hasOnlyYAsVowel(lower)) {
         let firstYIndex = lower.indexOf("y");
         let cluster = lower.slice(0, firstYIndex);
         let rest = lower.slice(firstYIndex);
