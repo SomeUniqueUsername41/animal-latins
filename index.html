@@ -65,7 +65,6 @@
       <option value="oof">Horse Latin</option>
       <option value="eb">Spider Latin</option>
       <option value="op">Rabbit Latin</option>
-      <option value="ime">Snail Latin</option>
       <option value="earl">Clam Latin</option>
       <option value="ood">Beaver Latin</option>
       <option value="ook">Ape Latin</option>
@@ -76,7 +75,7 @@
     <label for="output">Translation</label>
     <textarea id="output" class="output-box" readonly></textarea>
   </div>
-  
+
   <p>If inputting acronyms, like NASA, and abbreviations with vowels in them, like SNES, please put periods in between the letters (like N.A.S.A.) so that the translator doesn't translate them.</p>
   <br>
   <p>When I was around 13 or 14 years old, there was an app for a Duck Latin translator that was just like a Pig Latin translator, but it used the suffix "-ack" (like "quack") instead of "-ay". This translator takes that same idea for different animal-based Latins and uses suffixes based on qualities of, the sounds of, and things associated with the respective animals that the different animal Latins are based off of. So, for instance, Mouse Latin uses the suffix "-eak" as in "squeak" and Squirrel Latin uses "-ut" as in "nut", and Camel Latin uses "-ump" as in "hump".</p>
@@ -88,26 +87,44 @@
 
     input.addEventListener("input", updateOutput);
     animalSelect.addEventListener("change", updateOutput);
+    
+    // ADD YOUR PROTECTED ABBREVIATIONS HERE
+    const PROTECTED_ABBREVIATIONS = [
+      "NES",
+      "SNES",
+      "N64",
+      "PS1",
+      "PS2",
+      "PS3",
+      "PS4",
+      "PS5",
+      "CPU",
+      "GPU"
+    ];
 
     function updateOutput() {
       output.value = translateToAnimalLatin(input.value, animalSelect.value);
     }
 
     function translateToAnimalLatin(text, suffix) {
-      let tokens = text.match(/[A-Za-z]+(?:'[A-Za-z]+)*|\.|-|[^A-Za-z.\-]+/g) || [];
+      let tokens = text.match(/[A-Za-z0-9]+(?:'[A-Za-z]+)*|\.|-|[^A-Za-z0-9.\-]+/g) || [];
       let result = [];
 
       for (let i = 0; i < tokens.length; i++) {
         let token = tokens[i];
+        
+        // Skip protected abbreviations
+        if (PROTECTED_ABBREVIATIONS.includes(token)) {
+          result.push(token);
+          continue;
+        }
 
-        // Keep any single letter followed directly by a period unchanged.
         if (isSingleLetterFollowedByPeriod(tokens, i)) {
           result.push(token + ".");
           i += 1;
           continue;
         }
 
-        // Keep acronym runs like N.A.S.A. unchanged.
         let acronymLength = getAcronymRunLength(tokens, i);
         if (acronymLength >= 2) {
           result.push(handleAcronym(tokens, i, acronymLength));
@@ -115,7 +132,6 @@
           continue;
         }
 
-        // sci-fi special case
         if (
           /^[A-Za-z]+$/.test(token) &&
           tokens[i + 1] === "-" &&
@@ -137,12 +153,12 @@
           continue;
         }
 
-        if (!/^[A-Za-z]+(?:'[A-Za-z]+)*$/.test(token)) {
+        if (!/^[A-Za-z0-9]+(?:'[A-Za-z0-9]+)*$/.test(token)) {
           result.push(token);
           continue;
         }
 
-        if (isConsonantAbbreviation(token)) {
+        if (isProtectedAbbreviation(token)) {
           result.push(token);
           continue;
         }
@@ -197,6 +213,51 @@
       return lower.length >= 2 && !/[aeiouy]/.test(lower);
     }
 
+    function isProtectedAbbreviation(token) {
+      if (!/^[A-Z0-9]+$/.test(token) || token.length < 2) {
+        return false;
+      }
+
+      return /[AEIOU]/.test(token) || /\d/.test(token) || isConsonantAbbreviation(token);
+    }
+
+    function startsWithYSoundU(word) {
+      let lower = word.toLowerCase();
+
+      if (!lower.startsWith("u")) return false;
+
+      let ySoundPrefixes = [
+        "uni",
+        "use",
+        "user",
+        "usual",
+        "ut",
+        "uran",
+        "urani",
+        "uranus",
+        "uter",
+        "utop",
+        "urol",
+        "urop",
+        "ufo"
+      ];
+
+      let ooSoundPrefixes = [
+        "um",
+        "up",
+        "ub",
+        "ug",
+        "ul",
+        "under"
+      ];
+
+      if (ooSoundPrefixes.some(prefix => lower.startsWith(prefix))) {
+        return false;
+      }
+
+      return ySoundPrefixes.some(prefix => lower.startsWith(prefix));
+    }
+
     function translateWord(token, suffix) {
       let isAllCaps = token.length >= 2 && token === token.toUpperCase();
       let startsWithCapital = token[0] === token[0].toUpperCase();
@@ -206,6 +267,8 @@
 
       if (lower === "an") {
         translated = "aw" + suffix;
+      } else if (startsWithYSoundU(lower)) {
+        translated = lower + "y" + suffix;
       } else if (hasOnlyYAsVowel(lower)) {
         let firstYIndex = lower.indexOf("y");
         let cluster = lower.slice(0, firstYIndex);
