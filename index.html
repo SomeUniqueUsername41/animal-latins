@@ -91,20 +91,15 @@
 
     input.addEventListener("input", updateOutput);
     animalSelect.addEventListener("change", updateOutput);
-    
-    // ADD YOUR PROTECTED ABBREVIATIONS HERE
-    const PROTECTED_ABBREVIATIONS = [
-      "NES",
-      "SNES",
-      "N64",
-      "PS1",
-      "PS2",
-      "PS3",
-      "PS4",
-      "PS5",
-      "CPU",
-      "GPU"
-    ];
+
+    const PROTECTED_ABBREVIATIONS = new Set([
+      "blvd",
+      "st",
+      "dr",
+      "mr",
+      "mrs",
+      "ms"
+    ]);
 
     function updateOutput() {
       output.value = translateToAnimalLatin(input.value, animalSelect.value);
@@ -116,10 +111,13 @@
 
       for (let i = 0; i < tokens.length; i++) {
         let token = tokens[i];
-        
-        // Skip protected abbreviations
-        if (PROTECTED_ABBREVIATIONS.includes(token)) {
+
+        if (isProtectedAbbreviation(tokens, i)) {
           result.push(token);
+          if (tokens[i + 1] === ".") {
+            result.push(".");
+            i += 1;
+          }
           continue;
         }
 
@@ -162,15 +160,19 @@
           continue;
         }
 
-        if (isProtectedAbbreviation(token)) {
-          result.push(token);
-          continue;
-        }
-
         result.push(translateWord(token, suffix));
       }
 
       return result.join("");
+    }
+
+    function isProtectedAbbreviation(tokens, i) {
+      let token = tokens[i];
+      if (!token || !/^[A-Za-z]+$/.test(token)) {
+        return false;
+      }
+
+      return PROTECTED_ABBREVIATIONS.has(token.toLowerCase());
     }
 
     function isSingleLetterFollowedByPeriod(tokens, i) {
@@ -217,14 +219,6 @@
       return lower.length >= 2 && !/[aeiouy]/.test(lower);
     }
 
-    function isProtectedAbbreviation(token) {
-      if (!/^[A-Z0-9]+$/.test(token) || token.length < 2) {
-        return false;
-      }
-
-      return /[AEIOU]/.test(token) || /\d/.test(token) || isConsonantAbbreviation(token);
-    }
-
     function startsWithYSoundU(word) {
       let lower = word.toLowerCase();
 
@@ -237,6 +231,7 @@
         "usual",
         "ut",
         "uran",
+        "urolog",
         "urani",
         "uranus",
         "uter",
@@ -306,10 +301,10 @@
 
     function startsWithHyRule(word) {
       const hyWords = [
-        "hyena","hyaena","hybrid","hyper","hyperactive","hyperactivity",
-        "hygiene","hyacinth","hydrogen","hydrogenation","hyphen",
-        "hyphenate","hyphenated","hypertrophy","hypertrophic",
-        "hypothesis","hypotheses","hyaluronic","hydration","hydrated","hydra"
+        "hyena", "hyaena", "hybrid", "hyper", "hyperactive", "hyperactivity",
+        "hygiene", "hyacinth", "hydrogen", "hydrogenation", "hyphen",
+        "hyphenate", "hyphenated", "hypertrophy", "hypertrophic",
+        "hypothesis", "hypotheses", "hyaluronic", "hydration", "hydrated", "hydra"
       ];
 
       return word.startsWith("hy") || hyWords.includes(word);
