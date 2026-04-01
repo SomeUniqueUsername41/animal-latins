@@ -92,13 +92,27 @@
     input.addEventListener("input", updateOutput);
     animalSelect.addEventListener("change", updateOutput);
 
-    const PROTECTED_ABBREVIATIONS = new Set([
+    const PROTECTED_WORDS = new Set([
       "blvd",
       "st",
       "dr",
       "mr",
       "mrs",
-      "ms"
+      "ms",
+      "aw",
+      "aww",
+      "brrr",
+      "grrr",
+      "hmmm",
+      "ooh",
+      "oh",
+      "argh",
+      "ew",
+      "eww",
+      "ugh",
+      "ah",
+      "ha",
+      "lol",
     ]);
 
     function updateOutput() {
@@ -112,7 +126,7 @@
       for (let i = 0; i < tokens.length; i++) {
         let token = tokens[i];
 
-        if (isProtectedAbbreviation(tokens, i)) {
+        if (isProtectedWord(tokens, i)) {
           result.push(token);
           if (tokens[i + 1] === ".") {
             result.push(".");
@@ -166,13 +180,13 @@
       return result.join("");
     }
 
-    function isProtectedAbbreviation(tokens, i) {
+    function isProtectedWord(tokens, i) {
       let token = tokens[i];
       if (!token || !/^[A-Za-z]+$/.test(token)) {
         return false;
       }
 
-      return PROTECTED_ABBREVIATIONS.has(token.toLowerCase());
+      return PROTECTED_WORDS.has(token.toLowerCase());
     }
 
     function isSingleLetterFollowedByPeriod(tokens, i) {
