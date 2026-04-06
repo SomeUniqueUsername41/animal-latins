@@ -172,6 +172,9 @@
 
           if (combined === "sci-fi") {
             result.push("i-fisc" + suffix);
+          } else if (combined === "wi-fi") {
+            let firstPart = token[0] === token[0].toUpperCase() ? "I" : "i";
+            result.push(firstPart + "-" + tokens[i + 2] + suffix);
           } else {
             result.push(
               translateWord(token, suffix) +
