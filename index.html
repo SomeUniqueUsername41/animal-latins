@@ -150,6 +150,11 @@
           continue;
         }
 
+        if (/^\d+$/.test(token)) {
+          result.push(token);
+          continue;
+        }
+
         if (isSingleLetterFollowedByPeriod(tokens, i)) {
           result.push(token + ".");
           i += 1;
