@@ -299,6 +299,22 @@
       return ySoundPrefixes.some(prefix => lower.startsWith(prefix));
     }
 
+    function startsWithYSoundE(word) {
+      let lower = word.toLowerCase();
+
+      let ySoundPrefixes = [
+        "euro",
+        "europ",
+        "euph",
+        "eura",
+        "eure",
+        "eul",
+        "euni"
+      ];
+
+      return ySoundPrefixes.some(prefix => lower.startsWith(prefix));
+    }
+
     function translateWord(token, suffix) {
       let isAllCaps = token.length >= 2 && token === token.toUpperCase();
       let startsWithCapital = token[0] === token[0].toUpperCase();
@@ -309,6 +325,8 @@
       if (lower === "an") {
         translated = "aw" + suffix;
       } else if (startsWithYSoundU(lower)) {
+        translated = lower + "y" + suffix;
+      } else if (startsWithYSoundE(lower)) {
         translated = lower + "y" + suffix;
       } else if (hasOnlyYAsVowel(lower)) {
         let firstYIndex = lower.indexOf("y");
@@ -359,7 +377,7 @@
       const hyWords = [
         "hyena", "hyaena", "hybrid", "hyper", "hyperactive", "hyperactivity",
         "hygiene", "hyacinth", "hydrogen", "hydrogenation", "hyphen",
-        "hyphenate", "hyphenated", "hypertrophy", "hypertrophic",
+        "hyphenate", "hyphenated", "hypertrophy", "hypertrophic", "hygienic",
         "hypothesis", "hypotheses", "hyaluronic", "hydration", "hydrated", "hydra"
       ];
 
