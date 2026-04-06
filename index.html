@@ -315,6 +315,17 @@
       return ySoundPrefixes.some(prefix => lower.startsWith(prefix));
     }
 
+    function startsWithConsonantYCluster(word) {
+      return /^[bcdfghjklmnpqrstvwxyz]{1,2}y[bcdfghjklmnpqrstvwxyz]{1,2}(.*)$/i.test(word);
+    }
+
+    function translateConsonantYCluster(word, suffix) {
+      let match = word.match(/^([bcdfghjklmnpqrstvwxyz]{1,2})y([bcdfghjklmnpqrstvwxyz]{1,2})(.*)$/i);
+      if (!match) return null;
+
+      return "y" + match[2] + match[3] + match[1] + suffix;
+    }
+
     function translateWord(token, suffix) {
       let isAllCaps = token.length >= 2 && token === token.toUpperCase();
       let startsWithCapital = token[0] === token[0].toUpperCase();
@@ -322,14 +333,14 @@
 
       let translated;
 
-      if (/^[^aeiou]+y[^aeiou]{1,2}(?=[aeiou]|$)/.test(lower)) {
-        translated = lower + lower[0] + suffix;
-      } else if (lower === "an") {
+      if (lower === "an") {
         translated = "aw" + suffix;
       } else if (startsWithYSoundU(lower)) {
         translated = lower + "y" + suffix;
       } else if (startsWithYSoundE(lower)) {
         translated = lower + "y" + suffix;
+      } else if (startsWithConsonantYCluster(lower)) {
+        translated = translateConsonantYCluster(lower, suffix);
       } else if (hasOnlyYAsVowel(lower)) {
         let firstYIndex = lower.indexOf("y");
         let cluster = lower.slice(0, firstYIndex);
