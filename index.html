@@ -322,7 +322,9 @@
 
       let translated;
 
-      if (lower === "an") {
+      if (/^[^aeiou]+y[^aeiou]{1,2}(?=[aeiou]|$)/.test(lower)) {
+        translated = lower + lower[0] + suffix;
+      } else if (lower === "an") {
         translated = "aw" + suffix;
       } else if (startsWithYSoundU(lower)) {
         translated = lower + "y" + suffix;
