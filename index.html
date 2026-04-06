@@ -250,16 +250,6 @@
       return !/[aeiou]/.test(word) && /y/.test(word);
     }
 
-    function isConsonantAbbreviation(word) {
-      let lower = word.toLowerCase();
-
-      if (hasOnlyYAsVowel(lower)) {
-        return false;
-      }
-
-      return lower.length >= 2 && !/[aeiouy]/.test(lower);
-    }
-
     function startsWithYSoundU(word) {
       let lower = word.toLowerCase();
 
@@ -316,14 +306,14 @@
     }
 
     function startsWithConsonantYCluster(word) {
-      return /^[bcdfghjklmnpqrstvwxyz]{1,2}y[bcdfghjklmnpqrstvwxyz]{1,2}(.*)$/i.test(word);
+      return /^[bcdfghjklmnpqrstvwxyz]{1,2}y.+$/i.test(word) && !hasOnlyYAsVowel(word);
     }
 
     function translateConsonantYCluster(word, suffix) {
-      let match = word.match(/^([bcdfghjklmnpqrstvwxyz]{1,2})y([bcdfghjklmnpqrstvwxyz]{1,2})(.*)$/i);
+      let match = word.match(/^([bcdfghjklmnpqrstvwxyz]{1,2})y(.*)$/i);
       if (!match) return null;
 
-      return "y" + match[2] + match[3] + match[1] + suffix;
+      return "y" + match[2] + match[1] + suffix;
     }
 
     function translateWord(token, suffix) {
