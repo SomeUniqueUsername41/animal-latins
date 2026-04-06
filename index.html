@@ -169,12 +169,16 @@
           /^[A-Za-z]+$/.test(tokens[i + 2])
         ) {
           let combined = (token + "-" + tokens[i + 2]).toLowerCase();
+          let specialTranslation = null;
 
           if (combined === "sci-fi") {
-            result.push("i-fisc" + suffix);
+            specialTranslation = "i-fisc" + suffix;
           } else if (combined === "wi-fi") {
-            let firstPart = token[0] === token[0].toUpperCase() ? "I" : "i";
-            result.push(firstPart + "-" + tokens[i + 2] + suffix);
+            specialTranslation = "i-fiw" + suffix;
+          }
+
+          if (specialTranslation !== null) {
+            result.push(matchCase(token, specialTranslation));
           } else {
             result.push(
               translateWord(token, suffix) +
@@ -326,6 +330,21 @@
         translated = translated.toUpperCase();
       } else if (startsWithCapital) {
         translated = translated.charAt(0).toUpperCase() + translated.slice(1);
+      }
+
+      return translated;
+    }
+
+    function matchCase(original, translated) {
+      let isAllCaps = original.length >= 2 && original === original.toUpperCase();
+      let startsWithCapital = original[0] === original[0].toUpperCase();
+
+      if (isAllCaps) {
+        return translated.toUpperCase();
+      }
+
+      if (startsWithCapital) {
+        return translated.charAt(0).toUpperCase() + translated.slice(1);
       }
 
       return translated;
